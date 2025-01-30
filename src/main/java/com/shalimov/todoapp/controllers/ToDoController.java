@@ -6,6 +6,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -23,8 +25,16 @@ public class ToDoController implements CommandLineRunner {
 
         List<ToDoItem> allTodos = toDoItemRepository.findAll();
         model.addAttribute("allTodos", allTodos);
+        model.addAttribute("newTodo", new ToDoItem());
 
         return "index";
+    }
+
+    @PostMapping("/add")
+    public String addTodo(@ModelAttribute ToDoItem toDoItem){
+        toDoItemRepository.save(toDoItem);
+
+        return "redirect:/";
     }
 
     @Override

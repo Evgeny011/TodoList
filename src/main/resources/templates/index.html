@@ -1,16 +1,44 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Список дел</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Список дел</h1>
-    <ul>
-        <li th:each="item : ${allTodos}">
-            <span th:text="${item.getTitle()}"></span>
-        </li>
 
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">Список дел</h1>
+    <form th:action="@{/add}" th:object="${newTodo}" method="post" class="mb-3">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" th:field="*{title}" placeholder="Введите задачу">
+            <div class="input-group-text">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" th:field="*{priority}" id="highPriority" value="true">
+                    <label class="form-check-label" for="highPriority">Высокий</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" th:field="*{priority}" id="lowPriority" value="false">
+                    <label class="form-check-label" for="lowPriority">Низкий</label>
+                </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Добавить</button>
+        </div>
+    </form>
+
+    <ul class="list-group">
+        <li th:each="item : ${allTodos}" class="list-group-item d-flex justify-content-between align-items-center">
+            <span th:text="${item.title}"></span>
+            <div>
+                <small class="text-muted me-3" th:text="${#temporals.format(item.createdDate, 'dd.MM.yyyy HH:mm')}"></small>
+                <span th:if="${item.priority}" class="badge bg-danger">Высокий приоритет</span>
+                <span th:unless="${item.priority}" class="badge bg-secondary">Низкий приоритет</span>
+            </div>
+        </li>
     </ul>
+</div>
 </body>
 </html>
