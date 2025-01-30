@@ -15,17 +15,26 @@ public class ToDoItem {
     @Column(updatable = false)
     private LocalDateTime createdDate;
     private boolean priority;
+    private String marker;
 
     public ToDoItem() {
     }
 
-    public ToDoItem(Long id,String title, String description, boolean priority) {
+
+    public ToDoItem(Long id, String title, String description, boolean priority) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.priority = priority;
     }
 
+    public String getMarker() {
+        return marker;
+    }
+
+    public void setMarker(String marker) {
+        this.marker = marker;
+    }
 
     public boolean isPriority() {
         return priority;
@@ -35,7 +44,7 @@ public class ToDoItem {
         this.priority = priority;
     }
 
-    public ToDoItem(String title){
+    public ToDoItem(String title) {
         this.title = title;
         this.priority = !priority;
     }
