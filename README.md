@@ -35,5 +35,4 @@
 4. Перейдите на страницу локального хоста:
    ```bash
    http://localhost:8080
-   ./mvnw spring-boot:run
-   ./mvnw spring-boot:run
+
