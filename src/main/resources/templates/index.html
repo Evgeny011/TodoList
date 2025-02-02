@@ -136,6 +136,7 @@
         .search-container .dropdown-item:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
+
     </style>
 </head>
 
@@ -172,8 +173,6 @@
             <button class="btn btn-primary btn-lg" type="submit"><i class="fas fa-search"></i></button>
         </div>
     </form>
-
-    <!-- Форма добавления новой задачи -->
     <form th:action="@{/add}" th:object="${newTodo}" method="post" class="mb-4">
         <div class="mb-3">
             <input type="text" class="form-control form-control-lg" th:field="*{title}" placeholder="Введите задачу"
@@ -214,17 +213,16 @@
         </div>
         <button class="btn btn-primary btn-lg w-100" type="submit"><i class="fas fa-plus"></i> Добавить</button>
     </form>
-
-    <!-- Список задач -->
     <ul class="list-group">
         <li th:each="item : ${allTodos}" class="list-group-item d-flex justify-content-between align-items-center mb-2">
-            <span th:text="${item.title}" class="flex-grow-1"></span>
+            <span th:text="${item.getTitle()}" class="flex-grow-1"></span>
             <div class="d-flex align-items-center gap-2">
-                <small class="text-muted" th:text="${#temporals.format(item.createdDate, 'dd.MM.yy HH:mm')}"></small>
-                <span th:if="${item.priority}" class="badge bg-danger"><i class="fas fa-exclamation-circle"></i> Высокий</span>
-                <span th:unless="${item.priority}" class="badge bg-secondary"><i class="fas fa-check-circle"></i> Низкий</span>
-                <span th:if="${item.marker}" class="badge bg-info" th:text="${item.marker}"></span>
-                <form th:action="@{/delete/{id}(id=${item.id})}" method="post" style="display: inline;">
+                <small class="text-muted"
+                       th:text="${#temporals.format(item.getCreatedDate(), 'dd.MM.yy HH:mm')}"></small>
+                <span th:if="${item.isPriority()}" class="badge bg-danger"><i class="fas fa-exclamation-circle"></i> Высокий</span>
+                <span th:unless="${item.isPriority()}" class="badge bg-secondary"><i class="fas fa-check-circle"></i> Низкий</span>
+                <span th:if="${item.getMarker()}" class="badge bg-info" th:text="${item.getMarker()}"></span>
+                <form th:action="@{/delete/{id}(id=${item.getId()})}" method="post" style="display: inline;">
                     <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                 </form>
             </div>
