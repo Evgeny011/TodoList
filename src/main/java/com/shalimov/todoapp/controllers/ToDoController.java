@@ -53,6 +53,31 @@ public class ToDoController implements CommandLineRunner {
         return "redirect:/";
     }
 
+    @PostMapping("/updateDescription/{id}")
+    public String updateDescription(@PathVariable("id") Long id, @RequestParam("description") String newDescription) {
+        ToDoItem toDoItem = toDoItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Невалидный айди задачи:" + id));
+        String oldDescription = toDoItem.getDescription();
+
+        if (oldDescription != null && !oldDescription.isEmpty()) {
+            toDoItem.setDescription(oldDescription + "\n" + newDescription);
+        } else {
+
+            toDoItem.setDescription(newDescription);
+        }
+        toDoItemRepository.save(toDoItem);
+        return "redirect:/";
+    }
+
+    @PostMapping("/clearDescription/{id}")
+    public String clearDescription(@PathVariable("id") Long id) {
+        ToDoItem toDoItem = toDoItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Невалидный айди задачи:" + id));
+        toDoItem.setDescription("");
+        toDoItemRepository.save(toDoItem);
+        return "redirect:/";
+    }
+
     @Override
     public void run(String... args) throws Exception {
     }

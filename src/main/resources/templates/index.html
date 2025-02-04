@@ -179,6 +179,10 @@
                    required>
         </div>
         <div class="mb-3">
+            <label class="form-label">Описание:</label>
+            <textarea class="form-control" th:field="*{description}" placeholder="Введите описание"></textarea>
+        </div>
+        <div class="mb-3">
             <label class="form-label">Приоритет:</label>
             <div class="d-flex gap-3">
                 <div class="form-check">
@@ -215,13 +219,28 @@
     </form>
     <ul class="list-group">
         <li th:each="item : ${allTodos}" class="list-group-item d-flex justify-content-between align-items-center mb-2">
-            <span th:text="${item.getTitle()}" class="flex-grow-1"></span>
+            <div class="flex-grow-1">
+                <span th:text="${item.getTitle()}"></span>
+                <div th:if="${item.getDescription()}" class="text-muted" th:text="${item.getDescription()}"></div>
+                <form th:action="@{/updateDescription/{id}(id=${item.getId()})}" method="post" class="mt-2"
+                      style="display: none;" th:id="'editForm-' + ${item.getId()}">
+                    <textarea class="form-control" name="description" th:value="${item.getDescription()}"
+                              placeholder="Введите описание"></textarea>
+                    <button type="submit" class="btn btn-primary btn-sm mt-2">Обновить описание</button>
+                    <button type="button" class="btn btn-danger btn-sm mt-2"
+                            th:onclick="'clearDescription(' + ${item.getId()} + ')'">Очистить описание
+                    </button>
+                </form>
+            </div>
             <div class="d-flex align-items-center gap-2">
                 <small class="text-muted"
                        th:text="${#temporals.format(item.getCreatedDate(), 'dd.MM.yy HH:mm')}"></small>
                 <span th:if="${item.isPriority()}" class="badge bg-danger"><i class="fas fa-exclamation-circle"></i> Высокий</span>
                 <span th:unless="${item.isPriority()}" class="badge bg-secondary"><i class="fas fa-check-circle"></i> Низкий</span>
                 <span th:if="${item.getMarker()}" class="badge bg-info" th:text="${item.getMarker()}"></span>
+                <button class="btn btn-warning btn-sm" th:onclick="'toggleEditForm(' + ${item.getId()} + ')'">
+                    <i class="fas fa-edit"></i>
+                </button>
                 <form th:action="@{/delete/{id}(id=${item.getId()})}" method="post" style="display: inline;">
                     <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                 </form>
@@ -243,6 +262,32 @@
     function setMarker(value) {
         document.getElementById('markerInput').value = value;
         document.getElementById('markerDropdown').textContent = value;
+    }
+
+    function toggleEditForm(itemId) {
+        const editForm = document.getElementById('editForm-' + itemId);
+        if (editForm.style.display === 'none') {
+            editForm.style.display = 'block';
+        } else {
+            editForm.style.display = 'none';
+        }
+    }
+
+    function clearDescription(itemId) {
+        fetch('/clearDescription/' + itemId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload(); // Перезагрузить страницу после успешного выполнения
+            } else {
+                console.error('Ошибка при очистке описания');
+            }
+        }).catch(error => {
+            console.error('Ошибка:', error);
+        });
     }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
