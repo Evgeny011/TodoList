@@ -224,7 +224,7 @@
                 <div th:if="${item.getDescription()}" class="text-muted" th:text="${item.getDescription()}"></div>
                 <form th:action="@{/updateDescription/{id}(id=${item.getId()})}" method="post" class="mt-2"
                       style="display: none;" th:id="'editForm-' + ${item.getId()}">
-                    <textarea class="form-control" name="description" th:value="${item.getDescription()}"
+                    <textarea class="form-control" name="description" th:text="${item.getDescription()}"
                               placeholder="Введите описание"></textarea>
                     <button type="submit" class="btn btn-primary btn-sm mt-2">Обновить описание</button>
                     <button type="button" class="btn btn-danger btn-sm mt-2"
@@ -281,7 +281,7 @@
             }
         }).then(response => {
             if (response.ok) {
-                window.location.reload(); // Перезагрузить страницу после успешного выполнения
+                window.location.reload();
             } else {
                 console.error('Ошибка при очистке описания');
             }

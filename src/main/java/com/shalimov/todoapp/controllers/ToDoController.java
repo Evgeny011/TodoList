@@ -57,14 +57,7 @@ public class ToDoController implements CommandLineRunner {
     public String updateDescription(@PathVariable("id") Long id, @RequestParam("description") String newDescription) {
         ToDoItem toDoItem = toDoItemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Невалидный айди задачи:" + id));
-        String oldDescription = toDoItem.getDescription();
-
-        if (oldDescription != null && !oldDescription.isEmpty()) {
-            toDoItem.setDescription(oldDescription + "\n" + newDescription);
-        } else {
-
-            toDoItem.setDescription(newDescription);
-        }
+        toDoItem.setDescription(newDescription);
         toDoItemRepository.save(toDoItem);
         return "redirect:/";
     }
