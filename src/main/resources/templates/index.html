@@ -13,6 +13,21 @@
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #e0e0e0;
+            perspective: 1px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, #1a1a2e, #16213e);
+            transform: translateZ(-1px) scale(2);
+            z-index: -1;
         }
 
         .container {
@@ -48,21 +63,29 @@
         .btn-primary {
             background-color: #ff6f61;
             border-color: #ff6f61;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary:hover {
             background-color: #ff4a3d;
             border-color: #ff4a3d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
         }
 
         .btn-danger {
             background-color: #ff4757;
             border-color: #ff4757;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .btn-danger:hover {
-            background-color: #ff4757;
-            border-color: #ff4757;
+            background-color: #ff1a2e;
+            border-color: #ff1a2e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
         }
 
         .btn-outline-primary {
@@ -95,6 +118,10 @@
 
         .text-muted {
             color: #a0a0a0 !important;
+        }
+
+        .text-muted:hover {
+            color: #e0e0e0 !important;
         }
 
         .badge.bg-danger {
@@ -135,6 +162,19 @@
 
         .search-container .dropdown-item:hover {
             background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .list-group-item {
+            transition: all 0.3s ease;
+        }
+
+        .list-group-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+
+        .fas:hover {
+        transform: scale(1.1);
+        }
         }
 
     </style>
