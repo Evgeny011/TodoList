@@ -172,9 +172,9 @@
             transform: translateY(-5px);
             box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
 
-        .fas:hover {
-        transform: scale(1.1);
-        }
+            .fas:hover {
+                transform: scale(1.1);
+            }
         }
 
     </style>
@@ -257,8 +257,8 @@
         </div>
         <button class="btn btn-primary btn-lg w-100" type="submit"><i class="fas fa-plus"></i> Добавить</button>
     </form>
-    <ul class="list-group">
-        <li th:each="item : ${allTodos}" class="list-group-item d-flex justify-content-between align-items-center mb-2">
+    <ul class="list-group" id="sortable">
+        <li th:each="item : ${allTodos}" class="list-group-item d-flex justify-content-between align-items-center mb-2" th:attr="data-id=${item.getId()}">
             <div class="flex-grow-1">
                 <span th:text="${item.getTitle()}"></span>
                 <div th:if="${item.getDescription()}" class="text-muted" th:text="${item.getDescription()}"></div>
@@ -293,7 +293,31 @@
     </form>
 </div>
 
-<script>                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script>
+    $(function() {
+        $("#sortable").sortable({
+            update: function(event, ui) {
+                const order = $(this).sortable("toArray", { attribute: "data-id" });
+                fetch('/updateOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(order)
+                }).then(response => {
+                    if (!response.ok) {
+                        console.error('Ошибка при обновлении порядка задач');
+                    }
+                }).catch(error => {
+                    console.error('Ошибка:', error);
+                });
+            }
+        });
+        $("#sortable").disableSelection();
+    });
+
     function setPriority(value) {
         document.getElementById('priorityInput').value = value;
         document.getElementById('priorityDropdown').textContent = value === 'true' ? 'Высокий' : 'Низкий';
