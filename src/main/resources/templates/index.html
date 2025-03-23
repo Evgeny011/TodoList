@@ -250,6 +250,21 @@
         .modal-body .list-group-item:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
+
+        .btn-export {
+            background-color: #ff4757;
+            border-color: #ff4757;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-export:hover {
+            background-color: #ff1a2e;
+            border-color: #ff1a2e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -374,7 +389,6 @@
         </button>
     </form>
 
-    <!-- Модальное окно для истории удалений -->
     <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -392,6 +406,9 @@
                     </ul>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-export" onclick="exportDeletedTasksToJson()">
+                        <i class="fas fa-download"></i> Скачать JSON
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                 </div>
             </div>
@@ -399,7 +416,6 @@
     </div>
 
     <script>
-        // Функция для загрузки удаленных задач
         function loadDeletedTasks() {
             fetch('/deletedTasks')
                 .then(response => response.json())
@@ -411,18 +427,16 @@
                         const li = document.createElement('li');
                         li.className = 'list-group-item';
 
-                        // Добавляем название задачи
                         const title = document.createElement('div');
                         title.textContent = task.title;
-                        title.style.fontWeight = 'bold'; // Делаем название жирным
+                        title.style.fontWeight = 'bold';
                         li.appendChild(title);
 
-                        // Добавляем описание задачи, если оно есть
                         if (task.description) {
                             const description = document.createElement('div');
                             description.textContent = task.description;
-                            description.style.color = '#a0a0a0'; // Серый цвет для описания
-                            description.style.marginTop = '5px'; // Отступ сверху
+                            description.style.color = '#a0a0a0';
+                            description.style.marginTop = '5px';
                             li.appendChild(description);
                         }
 
@@ -432,12 +446,12 @@
                 .catch(error => console.error('Ошибка при загрузке истории удалений:', error));
         }
 
-        // Загрузка удаленных задач при открытии модального окна
+
         document.getElementById('historyModal').addEventListener('show.bs.modal', function () {
             loadDeletedTasks();
         });
 
-        // Остальные функции
+
         function setPriority(value) {
             document.getElementById('priorityInput').value = value;
             document.getElementById('priorityDropdown').textContent = value === 'true' ? 'Высокий' : 'Низкий';
@@ -529,7 +543,26 @@
                 }, { offset: Number.NEGATIVE_INFINITY }).element;
             }
         });
+
+        function exportDeletedTasksToJson() {
+            fetch('/exportDeletedTasks')
+                .then(response => response.json())
+                .then(data => {
+                    const jsonString = JSON.stringify(data, null, 2);
+                    const blob = new Blob([jsonString], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'deleted_tasks.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                })
+                .catch(error => console.error('Ошибка при экспорте удаленных задач:', error));
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</div>
 </body>
 </html>

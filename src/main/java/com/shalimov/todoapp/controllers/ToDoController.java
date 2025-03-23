@@ -91,6 +91,12 @@ public class ToDoController implements CommandLineRunner {
         return deletedTaskRepository.findAll();
     }
 
+    @GetMapping("/exportDeletedTasks")
+    @ResponseBody
+    public List<DeletedTask> exportDeletedTasks() {
+        return deletedTaskRepository.findAll();
+    }
+
     @Override
     public void run(String... args) throws Exception {
     }
