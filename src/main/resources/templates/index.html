@@ -434,6 +434,9 @@
                     <button type="button" class="btn btn-export" onclick="exportDeletedTasksToJson()">
                         <i class="fas fa-download"></i> Скачать JSON
                     </button>
+                    <button type="button" class="btn btn-danger" onclick="deleteAllDeletedTasks()">
+                        <i class="fas fa-trash"></i> Очистить
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                 </div>
             </div>
@@ -599,6 +602,23 @@
                     URL.revokeObjectURL(url);
                 })
                 .catch(error => console.error('Ошибка при экспорте удаленных задач:', error));
+        }
+
+        function deleteAllDeletedTasks() {
+            fetch('/deleteAllDeletedTasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    console.error('Ошибка при удалении всех удаленных задач');
+                }
+            }).catch(error => {
+                console.error('Ошибка:', error);
+            });
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
