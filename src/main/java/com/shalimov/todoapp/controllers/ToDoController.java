@@ -126,6 +126,12 @@ public class ToDoController implements CommandLineRunner {
         return "redirect:/";
     }
 
+    @PostMapping("/deleteDeletedTask/{id}")
+    public String deleteDeletedTask(@PathVariable("id") Long id) {
+        deletedTaskRepository.deleteById(id);
+        return "redirect:/";
+    }
+
     @Override
     public void run(String... args) throws Exception {
     }

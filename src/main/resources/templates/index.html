@@ -422,6 +422,11 @@
                                     <i class="fas fa-undo"></i> Восстановить
                                 </button>
                             </form>
+                            <form th:action="@{/deleteDeletedTask/{id}(id=${task.id})}" method="post" style="display: inline; margin-top: 10px; margin-left: 10px;">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Удалить
+                                </button>
+                            </form>
                         </li>
                     </ul>
                 </div>
@@ -441,7 +446,7 @@
                 .then(response => response.json())
                 .then(data => {
                     const deletedTasksList = document.getElementById('deletedTasksList');
-                    deletedTasksList.innerHTML = ''; // Очищаем список перед добавлением новых элементов
+                    deletedTasksList.innerHTML = '';
 
                     data.forEach(task => {
                         const li = document.createElement('li');
