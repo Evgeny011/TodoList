@@ -23,7 +23,7 @@ public class ToDoController implements CommandLineRunner {
     }
 
     @GetMapping
-    public String index(Model model, @RequestParam(required = false) String search, @RequestParam(required = false) String marker, @RequestParam(required = false) Boolean priority) {
+    public String index(Model model, @RequestParam(required = false) String search, @RequestParam(required = false) String marker, @RequestParam(required = false) Boolean priority, @RequestParam(required = false) String error) {
         List<ToDoItem> allTodos;
         if (search != null && !search.isEmpty()) {
             allTodos = toDoItemRepository.findByTitleContainingIgnoreCase(search);
@@ -34,6 +34,13 @@ public class ToDoController implements CommandLineRunner {
         } else {
             allTodos = toDoItemRepository.findAll();
         }
+        List<DeletedTask> deletedTasks = deletedTaskRepository.findAll(); // Убедитесь, что данные есть
+        model.addAttribute("deletedTasks", deletedTasks);
+
+        if (error != null && error.equals("TaskAlreadyExists")) {
+            model.addAttribute("errorMessage", "Задача с таким названием уже существует.");
+        }
+
         model.addAttribute("allTodos", allTodos);
         model.addAttribute("newTodo", new ToDoItem());
         return "index";
@@ -95,6 +102,28 @@ public class ToDoController implements CommandLineRunner {
     @ResponseBody
     public List<DeletedTask> exportDeletedTasks() {
         return deletedTaskRepository.findAll();
+    }
+
+    @PostMapping("/restore/{id}")
+    public String restoreTask(@PathVariable("id") Long id) {
+        DeletedTask deletedTask = deletedTaskRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Невалидный айди удаленной задачи:" + id));
+
+        if (toDoItemRepository.findByTitle(deletedTask.getTitle()).isPresent()) {
+            return "redirect:/?error=TaskAlreadyExists";
+        }
+
+        ToDoItem restoredTask = new ToDoItem();
+        restoredTask.setTitle(deletedTask.getTitle());
+        restoredTask.setDescription(deletedTask.getDescription());
+        restoredTask.setPriority(deletedTask.isPriority());
+        restoredTask.setMarker(deletedTask.getMarker());
+        restoredTask.setCreatedDate(deletedTask.getCreatedDate());
+
+        toDoItemRepository.save(restoredTask);
+        deletedTaskRepository.deleteById(id);
+
+        return "redirect:/";
     }
 
     @Override

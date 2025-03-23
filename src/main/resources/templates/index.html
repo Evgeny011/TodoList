@@ -260,11 +260,26 @@
         }
 
         .btn-export:hover {
-            background-color: #ff1a2e;
-            border-color: #ff1a2e;
+            background-color: #ff1a3e;
+            border-color: #ff1a3e;
             transform: translateY(-2px);
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
         }
+
+        .btn-success {
+            background-color: #ff4757;
+            border-color: #ff4757;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-success:hover {
+            background-color: #ff1a3e;
+            border-color: #ff1a3e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
     </style>
 </head>
 <body>
@@ -402,6 +417,11 @@
                             <div th:text="${task.title}"></div>
                             <div th:if="${task.description}" class="text-muted" th:text="${task.description}"></div>
                             <small class="text-muted" th:text="${#temporals.format(task.deletedDate, 'dd.MM.yy HH:mm')}"></small>
+                            <form th:action="@{/restore/{id}(id=${task.id})}" method="post" style="display: inline; margin-top: 10px;">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="fas fa-undo"></i> Восстановить
+                                </button>
+                            </form>
                         </li>
                     </ul>
                 </div>
@@ -440,16 +460,30 @@
                             li.appendChild(description);
                         }
 
+                        const deletedDate = document.createElement('small');
+                        deletedDate.className = 'text-muted';
+                        deletedDate.textContent = new Date(task.deletedDate).toLocaleString();
+                        li.appendChild(deletedDate);
+
+                        const restoreForm = document.createElement('form');
+                        restoreForm.action = `/restore/${task.id}`;
+                        restoreForm.method = 'post';
+                        restoreForm.style.display = 'inline';
+                        restoreForm.style.marginTop = '10px';
+
+                        const restoreButton = document.createElement('button');
+                        restoreButton.type = 'submit';
+                        restoreButton.className = 'btn btn-success btn-sm';
+                        restoreButton.innerHTML = '<i class="fas fa-undo"></i> Восстановить';
+
+                        restoreForm.appendChild(restoreButton);
+                        li.appendChild(restoreForm);
+
                         deletedTasksList.appendChild(li);
                     });
                 })
                 .catch(error => console.error('Ошибка при загрузке истории удалений:', error));
         }
-
-
-        document.getElementById('historyModal').addEventListener('show.bs.modal', function () {
-            loadDeletedTasks();
-        });
 
 
         function setPriority(value) {
