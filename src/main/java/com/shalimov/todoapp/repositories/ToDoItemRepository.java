@@ -11,4 +11,6 @@ public interface ToDoItemRepository extends JpaRepository<ToDoItem, Long> {
     List<ToDoItem> findByMarker(String marker);
 
     List<ToDoItem> findByPriority(Boolean priority);
+
+
 }

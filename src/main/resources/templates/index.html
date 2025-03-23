@@ -177,18 +177,17 @@
             transform: scale(1.1);
         }
 
-        /* Новые стили для кнопки "Скачать JSON" */
         .btn-export {
-            background-color: #17a2b8; /* Синий цвет */
-            border-color: #17a2b8;
+            background-color: #ff4757;
+            border-color: #ff4757;
             color: white;
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .btn-export:hover {
-            background-color: #138496; /* Темнее синий при наведении */
-            border-color: #138496;
+            background-color: #ff1a2e;
+            border-color: #ff1a2e;
             transform: translateY(-2px);
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
         }
@@ -197,15 +196,74 @@
             transform: translateY(0);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
+        .btn-history {
+            background-color: #ff4757;
+            border-color: #ff4757;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-history:hover {
+            background-color: #ff1a2e;
+            border-color: #ff1a2e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-history:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Стили для модального окна */
+        .modal-content {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+            color: #e0e0e0;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-title {
+            color: #e0e0e0;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-body .list-group-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body .list-group-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="text-center mb-0">Список дел</h1>
-        <button class="btn btn-export btn-sm" onclick="exportToJson()">
-            <i class="fas fa-download"></i> Скачать JSON
-        </button>
+        <div>
+            <button class="btn btn-export btn-sm" onclick="exportToJson()">
+                <i class="fas fa-download"></i> Скачать JSON
+            </button>
+            <button class="btn btn-history btn-sm" data-bs-toggle="modal" data-bs-target="#historyModal">
+                <i class="fas fa-history"></i> История удалений
+            </button>
+        </div>
     </div>
     <form th:action="@{/}" method="get" class="mb-4">
         <div class="search-container">
@@ -315,101 +373,163 @@
         <button type="submit" class="btn btn-danger btn-lg w-100"><i class="fas fa-trash"></i> Удалить все задачи
         </button>
     </form>
-</div>
 
-<script>
-    function setPriority(value) {
-        document.getElementById('priorityInput').value = value;
-        document.getElementById('priorityDropdown').textContent = value === 'true' ? 'Высокий' : 'Низкий';
-    }
+    <!-- Модальное окно для истории удалений -->
+    <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historyModalLabel">История удаленных задач</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul id="deletedTasksList" class="list-group">
+                        <li th:each="task : ${deletedTasks}" class="list-group-item">
+                            <div th:text="${task.title}"></div>
+                            <div th:if="${task.description}" class="text-muted" th:text="${task.description}"></div>
+                            <small class="text-muted" th:text="${#temporals.format(task.deletedDate, 'dd.MM.yy HH:mm')}"></small>
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    function setMarker(value) {
-        document.getElementById('markerInput').value = value;
-        document.getElementById('markerDropdown').textContent = value;
-    }
+    <script>
+        // Функция для загрузки удаленных задач
+        function loadDeletedTasks() {
+            fetch('/deletedTasks')
+                .then(response => response.json())
+                .then(data => {
+                    const deletedTasksList = document.getElementById('deletedTasksList');
+                    deletedTasksList.innerHTML = ''; // Очищаем список перед добавлением новых элементов
 
-    function toggleEditForm(itemId) {
-        const editForm = document.getElementById('editForm-' + itemId);
-        if (editForm.style.display === 'none') {
-            editForm.style.display = 'block';
-        } else {
-            editForm.style.display = 'none';
+                    data.forEach(task => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item';
+
+                        // Добавляем название задачи
+                        const title = document.createElement('div');
+                        title.textContent = task.title;
+                        title.style.fontWeight = 'bold'; // Делаем название жирным
+                        li.appendChild(title);
+
+                        // Добавляем описание задачи, если оно есть
+                        if (task.description) {
+                            const description = document.createElement('div');
+                            description.textContent = task.description;
+                            description.style.color = '#a0a0a0'; // Серый цвет для описания
+                            description.style.marginTop = '5px'; // Отступ сверху
+                            li.appendChild(description);
+                        }
+
+                        deletedTasksList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Ошибка при загрузке истории удалений:', error));
         }
-    }
 
-    function clearDescription(itemId) {
-        fetch('/clearDescription/' + itemId, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(response => {
-            if (response.ok) {
-                window.location.reload();
+        // Загрузка удаленных задач при открытии модального окна
+        document.getElementById('historyModal').addEventListener('show.bs.modal', function () {
+            loadDeletedTasks();
+        });
+
+        // Остальные функции
+        function setPriority(value) {
+            document.getElementById('priorityInput').value = value;
+            document.getElementById('priorityDropdown').textContent = value === 'true' ? 'Высокий' : 'Низкий';
+        }
+
+        function setMarker(value) {
+            document.getElementById('markerInput').value = value;
+            document.getElementById('markerDropdown').textContent = value;
+        }
+
+        function toggleEditForm(itemId) {
+            const editForm = document.getElementById('editForm-' + itemId);
+            if (editForm.style.display === 'none') {
+                editForm.style.display = 'block';
             } else {
-                console.error('Ошибка при очистке описания');
+                editForm.style.display = 'none';
             }
-        }).catch(error => {
-            console.error('Ошибка:', error);
-        });
-    }
+        }
 
-    function exportToJson() {
-        fetch('/export')
-            .then(response => response.json())
-            .then(data => {
-                const jsonString = JSON.stringify(data, null, 2);
-                const blob = new Blob([jsonString], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'tasks.json';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            })
-            .catch(error => console.error('Ошибка при экспорте задач:', error));
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const todoList = document.getElementById('todoList');
-        let draggedItem = null;
-
-        todoList.addEventListener('dragstart', function(e) {
-            draggedItem = e.target;
-            e.target.style.opacity = '0.4';
-        });
-
-        todoList.addEventListener('dragend', function(e) {
-            e.target.style.opacity = '1';
-        });
-
-        todoList.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            const afterElement = getDragAfterElement(todoList, e.clientY);
-            if (afterElement == null) {
-                todoList.appendChild(draggedItem);
-            } else {
-                todoList.insertBefore(draggedItem, afterElement);
-            }
-        });
-
-        function getDragAfterElement(container, y) {
-            const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
-
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
+        function clearDescription(itemId) {
+            fetch('/clearDescription/' + itemId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    console.error('Ошибка при очистке описания');
+                }
+            }).catch(error => {
+                console.error('Ошибка:', error);
+            });
         }
-    });
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+        function exportToJson() {
+            fetch('/export')
+                .then(response => response.json())
+                .then(data => {
+                    const jsonString = JSON.stringify(data, null, 2);
+                    const blob = new Blob([jsonString], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'tasks.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                })
+                .catch(error => console.error('Ошибка при экспорте задач:', error));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const todoList = document.getElementById('todoList');
+            let draggedItem = null;
+
+            todoList.addEventListener('dragstart', function(e) {
+                draggedItem = e.target;
+                e.target.style.opacity = '0.4';
+            });
+
+            todoList.addEventListener('dragend', function(e) {
+                e.target.style.opacity = '1';
+            });
+
+            todoList.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(todoList, e.clientY);
+                if (afterElement == null) {
+                    todoList.appendChild(draggedItem);
+                } else {
+                    todoList.insertBefore(draggedItem, afterElement);
+                }
+            });
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

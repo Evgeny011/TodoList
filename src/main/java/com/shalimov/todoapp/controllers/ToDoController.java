@@ -1,7 +1,9 @@
 package com.shalimov.todoapp.controllers;
 
 import com.shalimov.todoapp.model.ToDoItem;
+import com.shalimov.todoapp.model.DeletedTask;
 import com.shalimov.todoapp.repositories.ToDoItemRepository;
+import com.shalimov.todoapp.repositories.DeletedTaskRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,9 +15,11 @@ import java.util.List;
 public class ToDoController implements CommandLineRunner {
 
     private final ToDoItemRepository toDoItemRepository;
+    private final DeletedTaskRepository deletedTaskRepository;
 
-    public ToDoController(ToDoItemRepository toDoItemRepository) {
+    public ToDoController(ToDoItemRepository toDoItemRepository, DeletedTaskRepository deletedTaskRepository) {
         this.toDoItemRepository = toDoItemRepository;
+        this.deletedTaskRepository = deletedTaskRepository;
     }
 
     @GetMapping
@@ -43,12 +47,16 @@ public class ToDoController implements CommandLineRunner {
 
     @PostMapping("/delete/{id}")
     public String deleteTodoItem(@PathVariable("id") Long id) {
-        toDoItemRepository.deleteById(id);
+        toDoItemRepository.findById(id).ifPresent(task -> {
+            deletedTaskRepository.save(new DeletedTask(task));
+            toDoItemRepository.deleteById(id);
+        });
         return "redirect:/";
     }
 
     @PostMapping("/delete")
     public String deleteAll() {
+        toDoItemRepository.findAll().forEach(task -> deletedTaskRepository.save(new DeletedTask(task)));
         toDoItemRepository.deleteAll();
         return "redirect:/";
     }
@@ -75,6 +83,12 @@ public class ToDoController implements CommandLineRunner {
     @ResponseBody
     public List<ToDoItem> exportToDoItems() {
         return toDoItemRepository.findAll();
+    }
+
+    @GetMapping("/deletedTasks")
+    @ResponseBody
+    public List<DeletedTask> getDeletedTasks() {
+        return deletedTaskRepository.findAll();
     }
 
     @Override
