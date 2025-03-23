@@ -71,6 +71,12 @@ public class ToDoController implements CommandLineRunner {
         return "redirect:/";
     }
 
+    @GetMapping("/export")
+    @ResponseBody
+    public List<ToDoItem> exportToDoItems() {
+        return toDoItemRepository.findAll();
+    }
+
     @Override
     public void run(String... args) throws Exception {
     }
