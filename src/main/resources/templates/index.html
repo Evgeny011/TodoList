@@ -52,7 +52,6 @@
             justify-content: space-between;
         }
 
-
         .list-group-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -304,6 +303,92 @@
             -webkit-box-orient: vertical;
         }
 
+        /* Стили для красивого индикатора символов */
+        .char-counter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: #a0a0a0;
+        }
+
+        .char-circle {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            background: conic-gradient(
+                    var(--circle-color) calc(var(--percentage) * 1%),
+                    rgba(255, 255, 255, 0.1) 0
+            );
+        }
+
+        .char-circle::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--inner-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .char-circle::after {
+            content: attr(data-percentage) '%';
+            position: relative;
+            z-index: 1;
+            color: var(--text-color);
+            text-shadow: 0 1px 1px var(--text-shadow);
+        }
+
+        .char-circle.green {
+            --circle-color: #4CAF50;
+            --inner-color: #1a1a2e;
+            --text-color: #e0e0e0;
+            --text-shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        .char-circle.yellow {
+            --circle-color: #FFC107;
+            --inner-color: #1a1a2e;
+            --text-color: #FFC107;
+            --text-shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        .char-circle.red {
+            --circle-color: #F44336;
+            --inner-color: #1a1a2e;
+            --text-color: #F44336;
+            --text-shadow: rgba(255, 255, 255, 0.3);
+        }
+
+        .char-circle.warning {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .char-progress {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            clip: rect(0, 26px, 26px, 13px);
+        }
     </style>
 </head>
 <body>
@@ -352,11 +437,15 @@
     <form th:action="@{/add}" th:object="${newTodo}" method="post" class="mb-4">
         <div class="mb-3">
             <input type="text" class="form-control form-control-lg" th:field="*{title}" placeholder="Введите задачу"
-                   required>
+                   required maxlength="150">
         </div>
         <div class="mb-3">
             <label class="form-label">Описание:</label>
-            <textarea class="form-control" th:field="*{description}" placeholder="Введите описание"></textarea>
+            <textarea class="form-control" th:field="*{description}" placeholder="Введите описание" id="descriptionInput" maxlength="150"></textarea>
+            <div class="char-counter">
+                <span id="charCount">0</span>/150
+                <div id="charCircle" class="char-circle green" data-percentage="0" style="--percentage: 0"></div>
+            </div>
         </div>
         <div class="mb-3">
             <label class="form-label">Приоритет:</label>
@@ -401,7 +490,11 @@
                 <form th:action="@{/updateDescription/{id}(id=${item.getId()})}" method="post" class="mt-2"
                       style="display: none;" th:id="'editForm-' + ${item.getId()}">
                 <textarea class="form-control" name="description" th:text="${item.getDescription()}"
-                          placeholder="Введите описание" style="width: 100%;"></textarea>
+                          placeholder="Введите описание" style="width: 100%;" maxlength="150"></textarea>
+                    <div class="char-counter">
+                        <span class="edit-char-count">0</span>/150
+                        <div class="char-circle edit-char-circle green" data-percentage="0" style="--percentage: 0"></div>
+                    </div>
                     <button type="submit" class="btn btn-primary btn-sm mt-2">Обновить описание</button>
                     <button type="button" class="btn btn-danger btn-sm mt-2"
                             th:onclick="'clearDescription(' + ${item.getId()} + ')'">Очистить описание
@@ -468,6 +561,66 @@
     </div>
 
     <script>
+        // Обработчик для счетчика символов в основном текстовом поле
+        const descriptionInput = document.getElementById('descriptionInput');
+        const charCount = document.getElementById('charCount');
+        const charCircle = document.getElementById('charCircle');
+
+        if (descriptionInput) {
+            descriptionInput.addEventListener('input', function() {
+                updateCharCounter(this, charCount, charCircle);
+            });
+
+            // Инициализация при загрузке
+            updateCharCounter(descriptionInput, charCount, charCircle);
+        }
+
+        // Функция для обновления счетчика символов
+        function updateCharCounter(textarea, countElement, circleElement) {
+            const currentLength = textarea.value.length;
+            const maxLength = textarea.maxLength;
+            const percentage = Math.round((currentLength / maxLength) * 100);
+
+            countElement.textContent = currentLength;
+            circleElement.setAttribute('data-percentage', percentage);
+            circleElement.style.setProperty('--percentage', percentage);
+
+            // Изменяем цвет кружка в зависимости от заполненности
+            if (percentage < 70) {
+                circleElement.className = 'char-circle green';
+            } else if (percentage < 90) {
+                circleElement.className = 'char-circle yellow';
+                if (percentage >= 85) {
+                    circleElement.classList.add('warning');
+                } else {
+                    circleElement.classList.remove('warning');
+                }
+            } else {
+                circleElement.className = 'char-circle red';
+                circleElement.classList.add('warning');
+            }
+        }
+
+        // Обработчики для счетчиков символов в формах редактирования
+        document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация всех форм редактирования
+            document.querySelectorAll('form[id^="editForm-"]').forEach(form => {
+                const textarea = form.querySelector('textarea');
+                const charCount = form.querySelector('.edit-char-count');
+                const charCircle = form.querySelector('.edit-char-circle');
+
+                if (textarea && charCount && charCircle) {
+                    // Инициализация при загрузке
+                    updateCharCounter(textarea, charCount, charCircle);
+
+                    // Обработчик ввода
+                    textarea.addEventListener('input', function() {
+                        updateCharCounter(this, charCount, charCircle);
+                    });
+                }
+            });
+        });
+
         function loadDeletedTasks() {
             fetch('/deletedTasks')
                 .then(response => response.json())
@@ -516,7 +669,6 @@
                 })
                 .catch(error => console.error('Ошибка при загрузке истории удалений:', error));
         }
-
 
         function setPriority(value) {
             document.getElementById('priorityInput').value = value;
