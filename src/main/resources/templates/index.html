@@ -50,6 +50,21 @@
             flex-wrap: wrap;
             align-items: flex-start;
             justify-content: space-between;
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 15px;
+            border-radius: 15px;
+        }
+
+        .list-group-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            border-radius: 15px 0 0 15px; /* Синхронизируем с основным скруглением */
+            background-color: #ff6f61;
         }
 
         .list-group-item:hover {
