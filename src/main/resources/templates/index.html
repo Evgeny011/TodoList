@@ -43,7 +43,15 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #e0e0e0;
             transition: all 0.3s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
         }
+
 
         .list-group-item:hover {
             transform: translateY(-2px);
@@ -145,6 +153,11 @@
 
         .search-container .form-control {
             flex-grow: 1;
+        }
+
+        .flex-grow-1 {
+            flex: 1;
+            min-width: 0;
         }
 
         .search-container .dropdown {
@@ -280,6 +293,17 @@
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
         }
 
+        .text-muted {
+            color: #a0a0a0 !important;
+            word-break: break-word;
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
     </style>
 </head>
 <body>
@@ -370,30 +394,30 @@
         <button class="btn btn-primary btn-lg w-100" type="submit"><i class="fas fa-plus"></i> Добавить</button>
     </form>
     <ul class="list-group" id="todoList">
-        <li th:each="item : ${allTodos}" class="list-group-item d-flex justify-content-between align-items-center mb-2" draggable="true" th:id="'item-' + ${item.getId()}">
-            <div class="flex-grow-1">
-                <span th:text="${item.getTitle()}"></span>
-                <div th:if="${item.getDescription()}" class="text-muted" th:text="${item.getDescription()}"></div>
+        <li th:each="item : ${allTodos}" class="list-group-item mb-2" draggable="true" th:id="'item-' + ${item.getId()}" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;">
+            <div class="flex-grow-1" style="min-width: 0; overflow: hidden;">
+                <div style="font-weight: bold; word-break: break-word;" th:text="${item.getTitle()}"></div>
+                <div th:if="${item.getDescription()}" class="text-muted" style="word-break: break-word; white-space: normal; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;" th:text="${item.getDescription()}"></div>
                 <form th:action="@{/updateDescription/{id}(id=${item.getId()})}" method="post" class="mt-2"
                       style="display: none;" th:id="'editForm-' + ${item.getId()}">
-                    <textarea class="form-control" name="description" th:text="${item.getDescription()}"
-                              placeholder="Введите описание"></textarea>
+                <textarea class="form-control" name="description" th:text="${item.getDescription()}"
+                          placeholder="Введите описание" style="width: 100%;"></textarea>
                     <button type="submit" class="btn btn-primary btn-sm mt-2">Обновить описание</button>
                     <button type="button" class="btn btn-danger btn-sm mt-2"
                             th:onclick="'clearDescription(' + ${item.getId()} + ')'">Очистить описание
                     </button>
                 </form>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <small class="text-muted"
+            <div class="d-flex align-items-center gap-2 flex-shrink-0" style="flex-wrap: wrap; justify-content: flex-end;">
+                <small class="text-muted flex-shrink-0"
                        th:text="${#temporals.format(item.getCreatedDate(), 'dd.MM.yy HH:mm')}"></small>
-                <span th:if="${item.isPriority()}" class="badge bg-danger"><i class="fas fa-exclamation-circle"></i> Высокий</span>
-                <span th:unless="${item.isPriority()}" class="badge bg-secondary"><i class="fas fa-check-circle"></i> Низкий</span>
-                <span th:if="${item.getMarker()}" class="badge bg-info" th:text="${item.getMarker()}"></span>
-                <button class="btn btn-warning btn-sm" th:onclick="'toggleEditForm(' + ${item.getId()} + ')'">
+                <span th:if="${item.isPriority()}" class="badge bg-danger flex-shrink-0"><i class="fas fa-exclamation-circle"></i> Высокий</span>
+                <span th:unless="${item.isPriority()}" class="badge bg-secondary flex-shrink-0"><i class="fas fa-check-circle"></i> Низкий</span>
+                <span th:if="${item.getMarker()}" class="badge bg-info flex-shrink-0" th:text="${item.getMarker()}"></span>
+                <button class="btn btn-warning btn-sm flex-shrink-0" th:onclick="'toggleEditForm(' + ${item.getId()} + ')'">
                     <i class="fas fa-edit"></i>
                 </button>
-                <form th:action="@{/delete/{id}(id=${item.getId()})}" method="post" style="display: inline;">
+                <form th:action="@{/delete/{id}(id=${item.getId()})}" method="post" style="display: inline; flex-shrink: 0;">
                     <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                 </form>
             </div>
