@@ -63,7 +63,7 @@
             top: 0;
             bottom: 0;
             width: 8px;
-            border-radius: 15px 0 0 15px; /* Синхронизируем с основным скруглением */
+            border-radius: 15px 0 0 15px;
             background-color: #ff6f61;
         }
 
@@ -318,7 +318,6 @@
             -webkit-box-orient: vertical;
         }
 
-        /* Стили для красивого индикатора символов */
         .char-counter {
             display: flex;
             align-items: center;
@@ -576,7 +575,6 @@
     </div>
 
     <script>
-        // Обработчик для счетчика символов в основном текстовом поле
         const descriptionInput = document.getElementById('descriptionInput');
         const charCount = document.getElementById('charCount');
         const charCircle = document.getElementById('charCircle');
@@ -586,11 +584,9 @@
                 updateCharCounter(this, charCount, charCircle);
             });
 
-            // Инициализация при загрузке
             updateCharCounter(descriptionInput, charCount, charCircle);
         }
 
-        // Функция для обновления счетчика символов
         function updateCharCounter(textarea, countElement, circleElement) {
             const currentLength = textarea.value.length;
             const maxLength = textarea.maxLength;
@@ -599,8 +595,6 @@
             countElement.textContent = currentLength;
             circleElement.setAttribute('data-percentage', percentage);
             circleElement.style.setProperty('--percentage', percentage);
-
-            // Изменяем цвет кружка в зависимости от заполненности
             if (percentage < 70) {
                 circleElement.className = 'char-circle green';
             } else if (percentage < 90) {
